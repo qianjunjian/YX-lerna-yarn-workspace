@@ -1,0 +1,45 @@
+import { defineConfig } from "vite";
+import path from "path";
+import reactRefresh from "@vitejs/plugin-react-refresh";
+import injectStyle from "vite-plugin-react-imp";
+import reactJsx from "vite-react-jsx";
+
+const config = defineConfig({
+    plugins: [
+        reactRefresh(),
+        injectStyle({
+            libList: [
+                {
+                    libName: "antd-mobile",
+                    style(componentName) {
+                        return `antd-mobile/es/${componentName}/style/css.js`
+                    }
+                }
+            ]
+        }),
+        reactJsx()
+    ],
+    resolve: {
+        alias: {
+            "@": path.resolve(process.cwd(), "./packages/<%=projectName%>/src")
+        }
+    },
+    esbuild: {
+        sourcemap: true
+    },
+    server: {
+        open: "/index.html",
+        host: "0.0.0.0",
+        proxy: {
+            "/lib": {
+                target: "http://192.168.9.92:3000/packages/<%=projectName%>/src/utils",
+                rewrite: (path) => path.replace(/^\/lib/, "")
+            },
+            "/index.html": {
+                target: "http://192.168.9.92:3000/.cache/<%=projectName%>/"
+            }
+        }
+    }
+})
+
+export default config;
